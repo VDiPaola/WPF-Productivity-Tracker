@@ -1,0 +1,26 @@
+﻿<Window x:Class="ProductivityTracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProductivityTracker"
+        mc:Ignorable="d"
+        Title="Productivity Tracker" Height="400" Width="200" ResizeMode="CanMinimize">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label x:Name="Date" Content="00:00:00 10/10/2032"/>
+            <Button Content="Goal Reached" Click="GoalAchievedButton_Click" Width="81"/>
+        </StackPanel>
+        
+        <Button Content="Calendar" Height="26" Width="113" Cursor="" Margin="0,16,0,0" Click="CalendarButton_Click"/>
+        <Label x:Name="Timer" Content="00:00:00" HorizontalAlignment="Center" Margin="0,23,0,0"/>
+        <Button x:Name="StartButton" Content="Start" Height="26" Width="112" Cursor="" Margin="0,13,0,0" Click="StartButton_Click"/>
+        <Button x:Name="PauseButton" Content="Pause" Height="26" Width="112" Cursor="" Margin="0,13,0,0" Click="PauseButton_Click"/>
+        <Button Content="Save Time" Height="26" Width="112" Cursor="" Margin="0,13,0,0" Click="SaveButton_Click"/>
+        <Slider x:Name="CustomTimerSlider" Width="159" Value="0" Maximum="180" ValueChanged="Slider_ValueChanged" Margin="0,45,0,0"/>
+        <Label x:Name="CustomTimer" Content="00:00:00" HorizontalAlignment="Center"/>
+        <Button Content="Save Custom Time" Height="26" Width="112" Cursor="" Click="SaveCustomButton_Click"/>
+
+
+    </StackPanel>
+</Window>
