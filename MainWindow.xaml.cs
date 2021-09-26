@@ -37,8 +37,7 @@ namespace ProductivityTracker
         public MainWindow()
         {
             InitializeComponent();
-            //set date label
-            Date.Content = DateTime.Now.ToString("dd/MM/yy HH:mm");
+            
 
             //create timer
             asyncTimer = new System.Timers.Timer(1000);
@@ -55,9 +54,50 @@ namespace ProductivityTracker
                 List<Date> imported = JsonConvert.DeserializeObject<List<Date>>(sr.ReadToEnd());
                 if (imported != null) {
                     dateList = imported;
+                    dateList.Sort((x, y) => x.dateTime.CompareTo(y.dateTime));
                 }
                 
             }
+
+            //set date picker and productivity time
+            Date.SelectedDate = DateTime.Now;
+            UpdateDateStats(DateTime.Now);
+
+            //mark dates that are achieved
+            List<CalendarDateRange> blackOutDates = dateList.Where(date => date.isGoalReached).Select(date => new CalendarDateRange(date.dateTime)).ToList();
+            foreach (CalendarDateRange range in blackOutDates)
+            {
+                //Date.BlackoutDates.Add(range);
+            }
+
+        }
+
+        private void UpdateDateStats(DateTime date)
+        {
+            int index = GetIndexFromDate(date);
+            if (index > -1)
+            {
+                ProductivityTime.Content = dateList[index].productivityTime.ToString("HH:mm:ss");
+                GoalAchievedCheckbox.IsChecked = dateList[index].isGoalReached;
+            }
+            else
+            {
+                ProductivityTime.Content = "00:00:00";
+                GoalAchievedCheckbox.IsChecked = false;
+            }
+
+        }
+
+        private void DateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DateTime date = (DateTime)e.AddedItems[0];
+            UpdateDateStats(date);
+        }
+
+        private void GoalAchievedCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            FillDates();
+            SetGoalAchieved((DateTime)Date.SelectedDate, (bool)GoalAchievedCheckbox.IsChecked);
             
         }
 
@@ -124,13 +164,6 @@ namespace ProductivityTracker
   
         }
 
-        private void CalendarButton_Click(object sender, RoutedEventArgs e)
-        {
-            FillDates();
-            Calendar calendar = new Calendar();
-            calendar.Show();
-        }
-
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             FillDates();
@@ -164,10 +197,10 @@ namespace ProductivityTracker
             File.WriteAllText(path, JsonConvert.SerializeObject(dateList));
         }
 
-        private void GoalAchievedButton_Click(object sender, RoutedEventArgs e)
+        private void GoalToggleButton_Click(object sender, RoutedEventArgs e)
         {
             FillDates();
-            GoalAchieved(DateTime.Now);
+            SetGoalAchieved(DateTime.Now);
         }
 
         private int GetIndexFromDate(DateTime date)
@@ -179,14 +212,14 @@ namespace ProductivityTracker
             return index;
         }
 
-        public bool GoalAchieved(DateTime date)
+        private bool SetGoalAchieved(DateTime date, bool achieved = true)
         {
             int index = GetIndexFromDate(date);
-            if(index > -1 && dateList[index].isGoalReached == false)
+            if(index > -1)
             {
                 //set bool to true of goal reached
                 Date curDate = dateList[index];
-                curDate.isGoalReached = true;
+                curDate.isGoalReached = achieved;
                 dateList[index] = curDate;
 
                 //save
@@ -210,13 +243,17 @@ namespace ProductivityTracker
                 if(days.Days < 1) { return; }
                 for (int i =0; i <= days.Days; i++)
                 {
-                    //add date to list
                     DateTime now = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day);
+                    //make sure date doesnt exist yet
+                    int index = GetIndexFromDate(now);
+                    if (index > -1) { return; }
+                    //add date to list
                     Date date = new Date() { dateTime = now, isGoalReached = false, productivityTime = new DateTime() };
                     dateList.Add(date);
                     
                     //increment day
                     fromDate = fromDate.AddDays(1);
+                 
                 }
             }
             else
@@ -234,5 +271,7 @@ namespace ProductivityTracker
             DateTime time = new DateTime().AddMinutes(e.NewValue);
             CustomTimer.Content = time.ToString("HH:mm:ss");
         }
+
+        
     }
 }
